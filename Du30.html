@@ -1,0 +1,262 @@
+w<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Octet.com-No Other Heart</title>
+<style>
+  :root { --desktop:#08090b; --window:#d4d0c8; --ink:#111; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; width:100%; min-height:100%; }
+  body {
+    min-height:100vh; overflow:hidden; background:var(--desktop); color:#eee;
+    font-family:Tahoma, Verdana, Arial, sans-serif;
+  }
+  /* Fake old computer code screen behind the popup */
+  #desktop {
+    position:fixed; inset:-3%; overflow:hidden; padding:22px 14px;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px),
+      radial-gradient(ellipse at center, #16171b 0%, #070809 70%);
+    transform:scale(1.02);
+  }
+  #code {
+    font-family:Consolas, "Courier New", monospace;
+    font-size:clamp(12px, 2.1vw, 18px); line-height:1.72;
+    white-space:pre; color:#aaa; opacity:.92;
+    text-shadow:0 0 3px #000;
+    transform:rotate(-1deg);
+  }
+  .c1{color:#83c9b0}.c2{color:#e7b879}.c3{color:#91bde8}.c4{color:#d9d9d9}.c5{color:#c7a0e8}
+  #scanlines {
+    pointer-events:none; position:fixed; inset:0; z-index:20;
+    background:repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,.17) 3px 4px);
+    opacity:.45;
+  }
+  #vignette {
+    pointer-events:none; position:fixed; inset:0; z-index:21;
+    background:radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,.45) 100%);
+  }
+  #window {
+    position:fixed; z-index:10; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:min(520px, calc(100vw - 42px)); background:var(--window); color:var(--ink);
+    border:2px solid; border-color:#fff #555 #555 #fff;
+    box-shadow:2px 3px 0 rgba(0,0,0,.45);
+    font-family:Tahoma, Verdana, Arial, sans-serif;
+  }
+  #titlebar {
+    margin:3px 3px 0; height:27px; padding:4px 6px;
+    display:flex; align-items:center; justify-content:space-between;
+    color:#fff; font-size:13px; font-weight:bold; letter-spacing:.1px;
+    background:linear-gradient(90deg, #000080, #1084d0);
+  }
+  #close {
+    width:19px; height:19px; display:grid; place-items:center;
+    background:var(--window); color:#111; border:1px solid;
+    border-color:#fff #555 #555 #fff; font:16px Arial; line-height:1;
+  }
+  #bodyrow { display:flex; align-items:center; gap:17px; padding:24px 25px 18px; min-height:116px; }
+  #gif-slot { flex:0 0 44px; width:44px; min-height:44px; display:grid; place-items:center; }
+  #gif-slot img { max-width:44px; max-height:54px; object-fit:contain; image-rendering:auto; }
+  #lyric {
+    font-size:clamp(15px, 3.8vw, 19px); line-height:1.45; font-weight:400;
+    overflow-wrap:anywhere;
+  }
+  #lyric.fade { opacity:0; }
+  #lyric { transition:opacity .18s linear; }
+  #actions { display:flex; justify-content:center; padding:0 20px 19px; }
+  button {
+    min-width:75px; padding:6px 17px; font:15px Tahoma,Arial,sans-serif; color:#111;
+    background:var(--window); border:2px solid; border-color:#fff #555 #555 #fff;
+    border-radius:0; box-shadow:1px 1px 0 #888; cursor:pointer;
+  }
+  button:active { border-color:#555 #fff #fff #555; box-shadow:none; }
+  #start { min-width:90px; }
+  #status {
+    position:fixed; z-index:8; bottom:12px; left:50%; transform:translateX(-50%);
+    color:#a8a8a8; font:11px Consolas,"Courier New",monospace; letter-spacing:1px;
+    text-shadow:0 1px 4px #000;
+  }
+  #error {
+    display:none; position:fixed; inset:0; z-index:50; background:#fff; color:#202124;
+    padding:22vh 10vw 0; font:14px Arial,sans-serif;
+  }
+  #error .sad { font-size:42px; color:#5f6368; margin-bottom:26px; }
+  #error h1 { font-size:24px; font-weight:500; margin:0 0 12px; }
+  #error p { line-height:1.55; color:#5f6368; max-width:460px; }
+  #error .code { font-size:12px; color:#5f6368; margin-top:18px; }
+  @media(max-width:380px) {
+    #bodyrow { gap:12px; padding:20px 15px 16px; }
+    #gif-slot { flex-basis:36px; width:36px; }
+    #gif-slot img { max-width:36px; }
+  }
+</style>
+</head>
+<body>
+<div id="desktop"><div id="code"></div></div>
+
+<div id="window" role="dialog" aria-label="No Other Heart">
+  <div id="titlebar">
+    <span>Always</span>
+    <span id="close" aria-hidden="true">×</span>
+  </div>
+  <div id="bodyrow">
+    <!-- Replace YOUR_GIF_FILE.gif with your own GIF filename or URL -->
+    <div id="gif-slot"><img src="du30.jpg" alt="Your MSN emoji GIF"></div>
+    <div id="lyric">Press start</div>
+  </div>
+  <div id="actions"><button id="start">START</button></div>
+</div>
+<div id="status">00:00 / 02:43</div>
+
+<!-- Put your audio file beside this HTML file, then replace the filename below. -->
+<audio id="song" src="Digong.mp3" preload="auto"></audio>
+
+<div id="error">
+  <div class="sad">☹</div>
+  <h1>Internet connection lost</h1>
+  <p>It looks like you're offline. Check your connection and try again.</p>
+  <div class="code">ERR_INTERNET_DISCONNECTED</div>
+</div>
+<div id="scanlines"></div><div id="vignette"></div>
+
+<script>
+(() => {
+  const DURATION = 163;
+  // Adjust these timestamps to match your version of the song.
+  const LYRICS_START = 01; // instrumental intro: 0:00–0:18
+  const lines = [
+    { t: 01, text: "Laki ng title mo" },
+    { t: 02, text: "pwede pahawak po" },
+    { t: 04, text: "gusto kolang isubo" },
+    { t: 05, text: "anlaki hindi pasok" },
+    { t: 07, text: "Alam kopo na bawal" },
+    { t: 08, text: "pero gusto koto" },
+    { t: 11, text: "Mataba o mahaba" },
+    { t: 12, text: "ipapasok ko" },
+    { t: 14, text: "Saking burat meron akong sumusubo" },
+    { t: 18, text: "Nilabasan pero hindi pako tapos" },
+    { t: 21, text: "Kumuha ng Dildo" },
+    { t: 22, text: "sinakyan na ni bro" },
+    { t: 24, text: "Ansarap gusto kopang ulitin to" },
+    { t: 27, text: "WOHO OOH OOH" },
+    { t: 30, text: "Anlaki ng title mo" },
+    { t: 34, text: "WOHO OOH OOH" },
+    { t: 36, text: "Napakalaki ng Title mo" },
+    { t: 41, text: "Laki ng title mo" },
+    { t: 42, text: "pwede pahawak po" },
+    { t: 43, text: "Gusto kolang isubo" },
+    { t: 45, text: "Anlaki hindi pasok" },
+    { t: 48, text: "Alam kopo na bawal" },
+    { t: 49, text: "pero gusto koto" },
+    { t: 51, text: "Mataba o mahaba" },
+    { t: 52, text: "ipapasok ko" },
+    { t: 53, text: "May burat" },
+    { t: 54, text: "May Kiffy" },
+    { t: 55, text: "Title ang pinili" },
+    { t: 56, text: "San si bro" },
+    { t: 57, text: "Halina't" },
+    { t: 58, text: "Simulan na job blow" },
+    { t: 60, text: "See,anlaki ng butas ng lubot ni Clark" }
+  ];
+
+  const code = document.getElementById("code");
+  const lyric = document.getElementById("lyric");
+  const startButton = document.getElementById("start");
+  const song = document.getElementById("song");
+  const windowBox = document.getElementById("window");
+  const status = document.getElementById("status");
+  const error = document.getElementById("error");
+  let running = false, startedAt = 0, lastLine = -1, raf = 0;
+
+  const snippets = [
+    '<span class="c1">const</span> message = { title: <span class="c2">"Always"</span>,',
+    '  <span class="c3">parentComponent</span>: null, <span class="c1">gifKey</span>: <span class="c2">"gif_blush"</span>,',
+    '  width: <span class="c5">35</span>, height: <span class="c5">35</span>, opacity: <span class="c5">1.0</span>',
+    '};',
+    '<span class="c1">function</span> <span class="c3">remember</span>(feeling) {',
+    '  <span class="c1">return</span> feeling != <span class="c2">null</span> ? feeling : <span class="c2">" "</span>;',
+    '}',
+    '<span class="c1">const</span> heart = <span class="c1">await</span> find(<span class="c2">"somewhere to belong"</span>);',
+    '<span class="c3">window</span>.message = <span class="c2">"Are you sick of me?"</span>;',
+    'manager.get(gifKey, width, height);',
+    '<span class="c4">if</span> (response === <span class="c2">kontol</span>) {',
+    '  <span class="c5">connection</span> = <span class="c2">"lost"</span>;',
+    '}'
+  ];
+  let codeHtml = "";
+  for (let i = 0; i < 85; i++) codeHtml += snippets[i % snippets.length] + "\n";
+  code.innerHTML = codeHtml;
+
+  function fmt(sec) {
+    const s = Math.floor(sec);
+    return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+  }
+  function showLine(i) {
+    if (i === lastLine) return;
+    lastLine = i;
+    lyric.classList.add("fade");
+    setTimeout(() => {
+      lyric.textContent = i >= 0 ? lines[i].text : "";
+      lyric.classList.remove("fade");
+    }, 120);
+  }
+  function showConnectionLost() {
+    document.getElementById("desktop").style.display = "none";
+    windowBox.style.display = "none";
+    status.style.display = "none";
+    document.getElementById("scanlines").style.display = "none";
+    document.getElementById("vignette").style.display = "none";
+    error.style.display = "block";
+    document.body.style.background = "#fff";
+  }
+  function finish() {
+    running = false;
+    cancelAnimationFrame(raf);
+    try { song.pause(); } catch (_) {}
+    // Leave the retro popup visible with a final message before the fake error screen.
+    lyric.classList.remove("fade");
+    lyric.textContent = "Thank you for coming!";
+    startButton.style.display = "";
+    startButton.textContent = "OK";
+    startButton.disabled = true;
+    status.textContent = "01:20 / 01:20";
+    setTimeout(showConnectionLost, 2200);
+  }
+  function tick() {
+    if (!running) return;
+    const elapsed = (!song.paused && Number.isFinite(song.currentTime))
+      ? song.currentTime : (performance.now() - startedAt) / 1000;
+    if (elapsed >= DURATION) { finish(); return; }
+    let active = -1;
+    for (let i = 0; i < lines.length; i++) if (elapsed >= lines[i].t) active = i;
+    if (elapsed < LYRICS_START) {
+      if (lastLine !== -1) { lastLine = -1; lyric.textContent = "Waiting for lyrics -Octet.com"; }
+    } else {
+      showLine(active);
+    }
+    status.textContent = fmt(elapsed) + " / 01:20";
+    raf = requestAnimationFrame(tick);
+  }
+  startButton.addEventListener("click", async () => {
+    if (running) return;
+    running = true;
+    startedAt = performance.now();
+    lastLine = -1;
+    lyric.textContent = "  ";
+    startButton.style.display = "";
+    startButton.textContent = "OK";
+    startButton.disabled = true;
+    try {
+      song.currentTime = 0;
+      await song.play();
+    } catch (err) {
+      // The page timer still runs, but the audio file must be beside this HTML file.
+      console.warn("Audio could not play. Check the MP3 filename and folder.", err);
+    }
+    tick();
+  });
+})();
+</script>
+</body>
+</html>
